@@ -1,0 +1,27 @@
+{
+  "name": "um-squared",
+  "version": "0.0.1",
+  "description": "RSO social media platform for UMass Schools",
+  "homepage": "https://github.com/NerdRivera/um-squared#readme",
+  "bugs": {
+    "url": "https://github.com/NerdRivera/um-squared/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/NerdRivera/um-squared.git"
+  },
+  "license": "ISC",
+  "author": "",
+  "type": "commonjs",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "express": "^5.2.1",
+    "react": "^19.2.7"
+  }
+}
