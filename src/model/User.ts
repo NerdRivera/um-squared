@@ -11,3 +11,7 @@ export interface AdminUser extends RegisteredUser {
     role: 'admin';
 }
 
+export interface organizationUser extends RegisteredUser {
+    role: 'organization';
+    organizationId: string;
+}
