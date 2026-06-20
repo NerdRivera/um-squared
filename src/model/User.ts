@@ -7,3 +7,7 @@ export interface RegisteredUser {
     updatedAt: Date;
 }
 
+export interface AdminUser extends RegisteredUser {
+    role: 'admin';
+}
+
