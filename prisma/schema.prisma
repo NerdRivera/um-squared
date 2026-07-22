@@ -1,0 +1,431 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─── Enums ───────────────────────────────────────────────────────────────────
+
+enum Role {
+  STUDENT
+  ORG_MEMBER
+  ORG_ADMIN
+  PLATFORM_ADMIN
+}
+
+enum OrgCategory {
+  GREEK_LIFE
+  RSO
+  INTRAMURAL_SPORTS
+  OTHER
+}
+
+enum ApplicationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum PostType {
+  TEXT
+  MEDIA
+  LINK
+  POLL
+  EVENT
+}
+
+enum PostStatus {
+  PUBLISHED
+  PENDING
+}
+
+enum PostVisibility {
+  PUBLIC
+  PRIVATE
+}
+
+enum FileType {
+  IMAGE
+  VIDEO
+  AUDIO
+}
+
+enum RSVPStatus {
+  GOING
+  MAYBE
+  WAITLISTED
+}
+
+enum NotificationType {
+  RSVP_CONFIRMED
+  WAITLIST_PROMOTED
+  NEW_MESSAGE
+  MENTION
+  POST_LIKE
+  POST_COMMENT
+}
+
+enum RecurringPattern {
+  NONE
+  DAILY
+  WEEKLY
+  MONTHLY
+}
+
+enum ModerationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum SportResult {
+  WIN
+  LOSS
+  DRAW
+}
+
+// ─── Core Models ─────────────────────────────────────────────────────────────
+
+model User {
+  id            String   @id @default(uuid())
+  email         String   @unique
+  password      String?
+  displayName   String
+  avatarUrl     String?
+  emailVerified Boolean  @default(false)
+  verifiedAt    DateTime?
+  role          Role     @default(STUDENT)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  applications    OrgApplication[]
+  comments        Comment[]
+  likes           Like[]
+  notifications   Notification[]
+  pollVotes       PollVote[]
+  eventRSVPs      EventRSVP[]
+  conversationsAsStudent Conversation[] @relation("StudentConversations")
+  messages        Message[]
+  moderatedBy     ModerationFlag[]      @relation("Moderator")
+
+  @@index([email])
+  @@index([role])
+}
+
+model Organization {
+  id            String   @id @default(uuid())
+  name          String   @unique
+  description   String
+  category      OrgCategory
+  coverImageUrl String?
+  bio           String?
+  websiteUrl    String?
+  socialLinks   Json?
+  memberCount   Int      @default(0)
+  postCount     Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  posts           Post[]
+
+  conversations   Conversation[]
+  scheduledPosts  ScheduledPost[]
+
+  @@index([category])
+  @@index([name])
+}
+
+model OrgApplication {
+  id               String              @id @default(uuid())
+  userId           String              @unique
+  organizationName String
+  description      String
+  category         OrgCategory
+  status           ApplicationStatus   @default(PENDING)
+  rejectedReason   String?
+  createdAt        DateTime            @default(now())
+  updatedAt        DateTime            @updatedAt
+
+  user             User                @relation(fields: [userId], references: [id])
+
+  @@index([status])
+  @@index([userId])
+}
+
+model Post {
+  id             String         @id @default(uuid())
+  organizationId String
+  type           PostType
+  content        String
+  title          String?
+  linkUrl        String?
+  status         PostStatus     @default(PUBLISHED)
+  visibility     PostVisibility @default(PUBLIC)
+  likeCount      Int            @default(0)
+  commentCount   Int            @default(0)
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  organization   Organization   @relation(fields: [organizationId], references: [id])
+  comments       Comment[]
+  likes          Like[]
+  attachments    PostAttachment[]
+  poll           Poll?
+  event          Event?
+  moderationFlag ModerationFlag?
+
+  @@index([organizationId])
+  @@index([status])
+  @@index([type])
+  @@index([createdAt])
+}
+
+model PostAttachment {
+  id         String   @id @default(uuid())
+  postId     String
+  fileName   String
+  fileUrl    String
+  fileType   FileType
+  fileSize   Int
+  mimeType   String
+  createdAt  DateTime @default(now())
+
+  post       Post     @relation(fields: [postId], references: [id])
+
+  @@index([postId])
+}
+
+model Comment {
+  id          String   @id @default(uuid())
+  postId      String
+  userId      String
+  content     String
+  likeCount   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  post        Post     @relation(fields: [postId], references: [id])
+  user        User     @relation(fields: [userId], references: [id])
+  likes       Like[]
+
+  @@index([postId])
+  @@index([userId])
+}
+
+model Like {
+  id         String   @id @default(uuid())
+  postId     String?
+  commentId  String?
+  userId     String
+  createdAt  DateTime @default(now())
+
+  post       Post?    @relation(fields: [postId], references: [id])
+  comment    Comment? @relation(fields: [commentId], references: [id])
+  user       User     @relation(fields: [userId], references: [id])
+
+  @@unique([userId, postId])
+  @@unique([userId, commentId])
+  @@index([userId])
+}
+
+// ─── Engagement Models ──────────────────────────────────────────────────────
+
+model Poll {
+  id              String    @id @default(uuid())
+  postId          String    @unique
+  question        String
+  singleChoice    Boolean   @default(true)
+  allowVoteChange Boolean   @default(false)
+  hideResults     Boolean   @default(false)
+  endsAt          DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  post            Post      @relation(fields: [postId], references: [id])
+  options         PollOption[]
+  votes           PollVote[]
+
+  @@index([postId])
+}
+
+model PollOption {
+  id         String   @id @default(uuid())
+  pollId     String
+  text       String
+  voteCount  Int      @default(0)
+  createdAt  DateTime @default(now())
+
+  poll       Poll     @relation(fields: [pollId], references: [id])
+  votes      PollVote[]
+
+  @@index([pollId])
+}
+
+model PollVote {
+  id         String   @id @default(uuid())
+  pollId     String
+  optionId   String
+  userId     String
+  createdAt  DateTime @default(now())
+
+  poll       Poll     @relation(fields: [pollId], references: [id])
+  option     PollOption @relation(fields: [optionId], references: [id])
+  user       User     @relation(fields: [userId], references: [id])
+
+  @@unique([pollId, userId])
+  @@index([pollId])
+  @@index([userId])
+}
+
+model Event {
+  id            String   @id @default(uuid())
+  postId        String   @unique
+  title         String
+  description   String
+  location      String
+  startTime     DateTime
+  endTime       DateTime
+  capacity      Int?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  post          Post     @relation(fields: [postId], references: [id])
+  rsvps         EventRSVP[]
+
+  @@index([postId])
+  @@index([startTime])
+}
+
+model EventRSVP {
+  id         String       @id @default(uuid())
+  eventId    String
+  userId     String
+  status     RSVPStatus
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+
+  event      Event        @relation(fields: [eventId], references: [id])
+  user       User         @relation(fields: [userId], references: [id])
+
+  @@unique([eventId, userId])
+  @@index([eventId])
+  @@index([userId])
+}
+
+model Conversation {
+  id              String   @id @default(uuid())
+  userId          String
+  organizationId  String
+  lastMessage     String?
+  lastMessageAt   DateTime?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  student         User     @relation("StudentConversations", fields: [userId], references: [id])
+  organization    Organization @relation(fields: [organizationId], references: [id])
+  messages        Message[]
+
+  @@unique([userId, organizationId])
+  @@index([userId])
+  @@index([organizationId])
+}
+
+model Message {
+  id              String   @id @default(uuid())
+  conversationId  String
+  senderId        String
+  content         String
+  read            Boolean  @default(false)
+  createdAt       DateTime @default(now())
+
+  conversation    Conversation @relation(fields: [conversationId], references: [id])
+  sender          User         @relation(fields: [senderId], references: [id])
+
+  @@index([conversationId])
+  @@index([senderId])
+}
+
+model Notification {
+  id          String          @id @default(uuid())
+  userId      String
+  type        NotificationType
+  title       String
+  message     String
+  read        Boolean         @default(false)
+  referenceId String?
+  createdAt   DateTime        @default(now())
+
+  user        User            @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([userId, read])
+  @@index([createdAt])
+}
+
+// ─── Content & Moderation Models ────────────────────────────────────────────
+
+model DiningMenu {
+  id          String   @id @default(uuid())
+  hallName    String
+  location    String
+  hours       Json
+  menuItems   Json
+  lastUpdated DateTime @default(now())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([hallName])
+}
+
+model SportsResult {
+  id        String      @id @default(uuid())
+  sport     String
+  opponent  String
+  result    SportResult
+  score     String
+  date      DateTime
+  createdAt DateTime   @default(now())
+
+  @@index([sport])
+  @@index([date])
+}
+
+model ModerationFlag {
+  id          String             @id @default(uuid())
+  postId      String             @unique
+  reason      String
+  status      ModerationStatus   @default(PENDING)
+  reviewedBy  String?
+  reviewedAt  DateTime?
+  createdAt   DateTime           @default(now())
+
+  post        Post               @relation(fields: [postId], references: [id])
+  reviewer    User?              @relation("Moderator", fields: [reviewedBy], references: [id])
+
+  @@index([status])
+  @@index([postId])
+}
+
+model ScheduledPost {
+  id               String           @id @default(uuid())
+  organizationId   String
+  content          String
+  type             PostType
+  title            String?
+  scheduledAt      DateTime
+  recurringPattern RecurringPattern @default(NONE)
+  recurringDay     String?
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+
+  organization     Organization     @relation(fields: [organizationId], references: [id])
+
+  @@index([organizationId])
+  @@index([scheduledAt])
+}

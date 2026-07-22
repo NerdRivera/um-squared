@@ -18,3 +18,5 @@ static/uploads/
 
 # Log files
 *.log
+
+/src/generated/prisma
