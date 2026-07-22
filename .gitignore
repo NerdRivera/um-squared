@@ -1,1 +1,20 @@
+# Dependencies
 node_modules/
+
+# Build output
+dist/
+
+# Environment variables
+.env
+
+# Database files
+*.db
+
+# Uploaded files
+static/uploads/
+
+# OS files
+.DS_Store
+
+# Log files
+*.log

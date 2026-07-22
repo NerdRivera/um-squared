@@ -1,0 +1,11 @@
+{
+    "chat.tools.terminal.autoApprove": {
+        "git checkout": true,
+        "npm install": true,
+        "npx json": true,
+        "/^node -e \"const pkg = require\\('\\./package\\.json'\\); pkg\\.scripts = \\{\\.\\.\\.pkg\\.scripts, dev: 'tsx watch src/server\\.ts', build: 'tsc', start: 'node dist/server\\.js'\\}; require\\('fs'\\)\\.writeFileSync\\('package\\.json', JSON\\.stringify\\(pkg, null, 2\\) \\+ '\\\\n'\\);\"$/": {
+            "approve": true,
+            "matchCommandLine": true
+        }
+    }
+}
