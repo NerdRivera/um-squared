@@ -4,7 +4,7 @@ import cors from "cors";
 import { env } from "./config";
 import { authenticateToken } from "./middleware";
 import { AppError } from "./utils";
-import { authRoutes, userRoutes } from "./routes";
+import { authRoutes, userRoutes, orgRoutes } from "./routes";
 
 const app = express();
 const PORT = env.PORT;
@@ -20,8 +20,8 @@ app.get("/health", (_req: Request, res: Response) => {
 
 app.use("/auth", authRoutes);
 app.use("/users", userRoutes);
+app.use("/orgs", orgRoutes);
 // app.use("/posts", authenticateToken, postRoutes);
-// app.use("/orgs", authenticateToken, orgRoutes);
 
 app.use((_req: Request, res: Response) => {
   res.status(404).json({ error: "Route not found" });

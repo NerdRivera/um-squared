@@ -93,17 +93,19 @@ enum SportResult {
 // ─── Core Models ─────────────────────────────────────────────────────────────
 
 model User {
-  id            String   @id @default(uuid())
-  email         String   @unique
-  password      String?
-  displayName   String
-  avatarUrl     String?
-  emailVerified Boolean  @default(false)
-  verifiedAt    DateTime?
-  role          Role     @default(STUDENT)
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  id             String   @id @default(uuid())
+  email          String   @unique
+  password       String?
+  displayName    String
+  avatarUrl      String?
+  emailVerified  Boolean  @default(false)
+  verifiedAt     DateTime?
+  role           Role     @default(STUDENT)
+  organizationId String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 
+  organization    Organization?    @relation(fields: [organizationId], references: [id])
   applications    OrgApplication[]
   comments        Comment[]
   likes           Like[]
@@ -117,6 +119,7 @@ model User {
 
   @@index([email])
   @@index([role])
+  @@index([organizationId])
 }
 
 model RefreshToken {
@@ -146,6 +149,7 @@ model Organization {
   updatedAt     DateTime @updatedAt
 
   posts           Post[]
+  members         User[]
 
   conversations   Conversation[]
   scheduledPosts  ScheduledPost[]
@@ -160,6 +164,7 @@ model OrgApplication {
   organizationName String
   description      String
   category         OrgCategory
+  contactInfo      String
   status           ApplicationStatus   @default(PENDING)
   rejectedReason   String?
   createdAt        DateTime            @default(now())

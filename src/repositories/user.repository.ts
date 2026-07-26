@@ -51,6 +51,13 @@ export class UserRepository {
     });
   }
 
+  linkToOrganization(id: string, organizationId: string, role: Role): Promise<UserModel> {
+    return prisma.user.update({
+      where: { id },
+      data: { organizationId, role },
+    });
+  }
+
   delete(id: string): Promise<UserModel> {
     return prisma.user.delete({ where: { id } });
   }
