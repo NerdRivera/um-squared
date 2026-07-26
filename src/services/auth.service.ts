@@ -43,7 +43,7 @@ export interface CasProfileInput {
   email: string;
 }
 
-function sanitizeUser(user: UserModel): SafeUser {
+export function sanitizeUser(user: UserModel): SafeUser {
   const { password: _password, ...safeUser } = user;
   return safeUser;
 }

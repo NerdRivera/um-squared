@@ -4,7 +4,7 @@ import cors from "cors";
 import { env } from "./config";
 import { authenticateToken } from "./middleware";
 import { AppError } from "./utils";
-import { authRoutes } from "./routes";
+import { authRoutes, userRoutes } from "./routes";
 
 const app = express();
 const PORT = env.PORT;
@@ -19,6 +19,7 @@ app.get("/health", (_req: Request, res: Response) => {
 });
 
 app.use("/auth", authRoutes);
+app.use("/users", userRoutes);
 // app.use("/posts", authenticateToken, postRoutes);
 // app.use("/orgs", authenticateToken, orgRoutes);
 

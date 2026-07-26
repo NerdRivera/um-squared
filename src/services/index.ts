@@ -6,3 +6,5 @@ export type {
   AuthTokens,
   CasProfileInput,
 } from "./auth.service";
+export { RoleService } from "./role.service";
+export type { ActingUser } from "./role.service";
