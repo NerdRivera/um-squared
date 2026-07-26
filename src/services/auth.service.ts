@@ -38,6 +38,11 @@ export interface AuthTokens {
   refreshToken: string;
 }
 
+export interface CasProfileInput {
+  netid: string;
+  email: string;
+}
+
 function sanitizeUser(user: UserModel): SafeUser {
   const { password: _password, ...safeUser } = user;
   return safeUser;
@@ -103,6 +108,30 @@ export class AuthService {
     const valid = await bcrypt.compare(input.password, user.password);
     if (!valid) {
       throw new UnauthorizedError("Invalid email or password");
+    }
+
+    const tokens = await this.issueTokens(user);
+    return { user: sanitizeUser(user), ...tokens };
+  }
+
+  /**
+   * Logs in a user authenticated via UMass CAS. Auto-links to an existing
+   * account by email, or creates a new (password-less, pre-verified)
+   * account if none exists. CAS itself is the source of truth for identity,
+   * so accounts are always marked verified on CAS login.
+   */
+  async loginWithCas(
+    profile: CasProfileInput
+  ): Promise<{ user: SafeUser } & AuthTokens> {
+    let user = await this.userRepository.findByEmail(profile.email);
+    if (!user) {
+      user = await this.userRepository.create({
+        email: profile.email,
+        displayName: profile.netid,
+      });
+    }
+    if (!user.emailVerified) {
+      user = await this.userRepository.markEmailVerified(user.id);
     }
 
     const tokens = await this.issueTokens(user);

@@ -20,5 +20,8 @@ router.post(
   authController.verifyEmail
 );
 router.get("/me", authenticateToken, authController.me);
+router.get("/cas/login", authController.casLogin);
+router.get("/cas/callback", authController.casCallback);
+router.get("/cas/logout", authController.casLogout);
 
 export default router;

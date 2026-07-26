@@ -4,4 +4,5 @@ export type {
   RegisterInput,
   LoginInput,
   AuthTokens,
+  CasProfileInput,
 } from "./auth.service";

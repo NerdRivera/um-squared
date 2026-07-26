@@ -28,6 +28,7 @@ export const env = {
   JWT_REFRESH_TTL: process.env.JWT_REFRESH_TTL || "7d",
   CAS_BASE_URL: process.env.CAS_BASE_URL!,
   CAS_SERVICE_URL: process.env.CAS_SERVICE_URL!,
+  FRONTEND_URL: process.env.FRONTEND_URL || "http://localhost:5173",
   PORT: parseInt(process.env.PORT || "3000", 10),
   NODE_ENV: process.env.NODE_ENV || "development",
 } as const;

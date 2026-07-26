@@ -4,7 +4,7 @@ import type { Role } from "../generated/prisma/enums";
 
 export interface CreateUserInput {
   email: string;
-  password: string;
+  password?: string;
   displayName: string;
 }
 
@@ -24,7 +24,7 @@ export class UserRepository {
     return prisma.user.create({
       data: {
         email: input.email,
-        password: input.password,
+        password: input.password ?? null,
         displayName: input.displayName,
       },
     });
