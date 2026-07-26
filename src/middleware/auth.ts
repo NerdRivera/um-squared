@@ -24,7 +24,7 @@ export function authenticateToken(
   }
 
   try {
-    const decoded = jwt.verify(token, env.JWT_SECRET) as {
+    const decoded = jwt.verify(token, env.JWT_ACCESS_SECRET) as {
       id: string;
       email: string;
       role: string;

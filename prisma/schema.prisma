@@ -113,9 +113,22 @@ model User {
   conversationsAsStudent Conversation[] @relation("StudentConversations")
   messages        Message[]
   moderatedBy     ModerationFlag[]      @relation("Moderator")
+  refreshTokens   RefreshToken[]
 
   @@index([email])
   @@index([role])
+}
+
+model RefreshToken {
+  id        String    @id @default(uuid())
+  userId    String
+  expiresAt DateTime
+  revokedAt DateTime?
+  createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }
 
 model Organization {

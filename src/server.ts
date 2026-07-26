@@ -4,6 +4,7 @@ import cors from "cors";
 import { env } from "./config";
 import { authenticateToken } from "./middleware";
 import { AppError } from "./utils";
+import { authRoutes } from "./routes";
 
 const app = express();
 const PORT = env.PORT;
@@ -17,8 +18,7 @@ app.get("/health", (_req: Request, res: Response) => {
   res.json({ status: "ok", timestamp: new Date().toISOString() });
 });
 
-// Routes (imported as features are added)
-// app.use("/auth", authRoutes);
+app.use("/auth", authRoutes);
 // app.use("/posts", authenticateToken, postRoutes);
 // app.use("/orgs", authenticateToken, orgRoutes);
 
