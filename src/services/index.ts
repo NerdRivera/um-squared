@@ -10,3 +10,5 @@ export { RoleService } from "./role.service";
 export type { ActingUser } from "./role.service";
 export { OrgApplicationService } from "./orgApplication.service";
 export type { ApplyOrgInput, OrgDecisionInput } from "./orgApplication.service";
+export { OrganizationService } from "./organization.service";
+export type { ListPageInput } from "./organization.service";

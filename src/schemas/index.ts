@@ -12,3 +12,5 @@ export type {
   ListOrgApplicationsDto,
   OrgApplicationDecisionDto,
 } from "./orgApplication.schema";
+export { updateOrganizationSchema, paginationQuerySchema } from "./organization.schema";
+export type { UpdateOrganizationDto, PaginationQueryDto } from "./organization.schema";
