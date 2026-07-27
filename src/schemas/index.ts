@@ -14,3 +14,7 @@ export type {
 } from "./orgApplication.schema";
 export { updateOrganizationSchema, paginationQuerySchema } from "./organization.schema";
 export type { UpdateOrganizationDto, PaginationQueryDto } from "./organization.schema";
+export { createPostSchema, updatePostSchema } from "./post.schema";
+export { createPollSchema, votePollSchema, updatePollSettingsSchema } from "./poll.schema";
+export { createEventSchema, updateEventSchema, rsvpSchema } from "./event.schema";
+export type { CreatePostDto, UpdatePostDto } from "./post.schema";
